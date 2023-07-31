@@ -6,3 +6,4 @@ coverage
 .serverless
 .env
 package-lock.json
+.DS_Store
