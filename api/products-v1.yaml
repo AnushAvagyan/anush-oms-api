@@ -1,0 +1,368 @@
+openapi: 3.0.1
+info:
+  title: Products
+  description: |
+    Provides the ability to view, create and manage products.
+  contact:
+    name: Anush Avagyan
+    email: a.anush.avagyan@gmail.com
+  version: 1.0.0
+servers:
+  - url: https://TOBEUPDATED/v1
+    description: Development
+paths:
+  /products:
+    post:
+      description: |
+        Creates an new product.
+      operationId: createProduct
+      # parameters:
+      #   - $ref: '#/components/parameters/header.Authorization'
+      requestBody:
+        $ref: '#/components/requestBodies/CreateProduct'
+      responses:
+        '201':
+          $ref: '#/components/responses/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Product
+    get:
+      description: List all products.
+      operationId: listProducts
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/query.page'
+        - $ref: '#/components/parameters/query.pageSize'
+      responses:
+        '200':
+          $ref: '#/components/responses/ProductList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Product
+  '/products/{id}':
+    get:
+      description: Get the details of a product by product ID
+      operationId: getProduct
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/path.id'
+      responses:
+        '200':
+          $ref: '#/components/responses/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Product
+    delete:
+      description: |
+        Deletes a product by id.
+      operationId: deleteProduct
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/path.id'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Product
+    patch:
+      description: |
+        Updates a product
+      operationId: updateProduct
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/path.id'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateProduct'
+      responses:
+        '200':
+          $ref: '#/components/responses/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Product
+components:
+  schemas:
+    CreateProduct:
+      description: Create Product request body.
+      properties:
+        name:
+          type: string
+          description: Name of the product
+        description:
+          type: string
+          description: Description of the product
+        inventory:
+          type: number
+          description: Quantity of products in stock
+        categoryId:
+          type: uuid
+          description: Refers to the category the product belongs to
+        price:
+          type: number
+        imageUrl:
+          type: string
+          description: Product image URL
+      required:
+        - name
+        - description
+        - price
+    UpdateProduct:
+      description: Update Product request body.
+      properties:
+        name:
+          type: string
+          description: Name of the product
+        description:
+          type: string
+          description: Description of the product
+        inventory:
+          type: number
+          description: Quantity of products in stock
+        categoryId:
+          type: uuid
+          description: Refers to the category the product belongs to
+        price:
+          type: number
+        imageUrl:
+          type: string
+          description: Product image URL
+    Product:
+      description: Product
+      properties:
+        id:
+          type: string
+          description: The id of the product
+          example: 42edcd77-d6f8-4c05-a441-930cb0085314
+        name:
+          type: string
+          description: Name of the product
+        description:
+          type: string
+          description: Description of the product
+        inventory:
+          type: number
+          description: Quantity of products in stock
+        categoryId:
+          type: uuid
+          description: Refers to the category the product belongs to
+        price:
+          type: number
+        imageUrl:
+          type: string
+          description: Product image URL
+        status:
+          $ref: '#/components/schemas/status'
+    ProductList:
+      description: Product list
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        totalItems:
+          type: integer
+          description: The total number of items contained in the collection
+        totalPages:
+          type: integer
+          description: The total number of pages given the requested page size
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+    status:
+      type: string
+      enum:
+        - active
+        - retired
+      description: |
+        The status of the product.
+        - active: Available
+        - retired: No longer visible or available / deleted
+
+    Error:
+      description: Standard error description.
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+      required:
+        - code
+        - message
+        - errors
+    PaginationLinks:
+      description: The hypermedia links for navigating the search results.
+      properties:
+        self:
+          $ref: '#/components/schemas/Link'
+        first:
+          $ref: '#/components/schemas/Link'
+        previous:
+          $ref: '#/components/schemas/Link'
+        next:
+          $ref: '#/components/schemas/Link'
+        last:
+          $ref: '#/components/schemas/Link'
+      required:
+        - self
+        - first
+        - previous
+        - next
+        - last
+    Link:
+      description: A hypermedia link to a resource.
+      properties:
+        href:
+          type: string
+          description: The link url.
+      required:
+        - href
+  parameters:
+    path.id:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: The resource identifier.
+    header.Authorization:
+      in: header
+      name: Authorization
+      required: true
+      schema:
+        type: string
+      description: |
+        Authorization header containing a valid JWT access token.
+    query.page:
+      in: query
+      name: page
+      schema:
+        type: integer
+      description: |
+        An integer greater than zero representing the page of the results.
+    query.pageSize:
+      in: query
+      name: pageSize
+      schema:
+        type: integer
+      description: |
+        An integer greater than zero indicating the maximum number of results
+        to return at one time.
+  requestBodies:
+    CreateProduct:
+      description: |
+        A request body to create a product.
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/CreateProduct'
+    UpdateProduct:
+      description: |
+        A request body to update a product.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateProduct'
+  responses:
+    Product:
+      description: Product
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Product'
+    ProductList:
+      description: Product
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProductList'
+    BadRequest:
+      description: 400 - Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: 401 - Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: 403 - Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalError:
+      description: 500 - Internal Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 404 - Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoContent:
+      description: 204 - No Content
+#   securitySchemes:
+#     oauth2:
+#       type: oauth2
+#       description: OAuth2 security scheme.
+#       flows:
+#         authorizationCode:
+#           authorizationUrl:
+#           tokenUrl:
+#           scopes: {}
+# security:
+#   - oauth2: []
+tags:
+  - name: Product

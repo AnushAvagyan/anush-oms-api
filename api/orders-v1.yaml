@@ -1,0 +1,346 @@
+openapi: 3.0.1
+info:
+  title: Orders
+  description: |
+    Provides the ability to view, create and manage orders.
+  contact:
+    name: Anush Avagyan
+    email: a.anush.avagyan@gmail.com
+  version: 1.0.0
+servers:
+  - url: https://TOBEUPDATED/v1
+    description: Development
+paths:
+  /orders:
+    post:
+      description: |
+        Creates an new order.
+      operationId: createOrder
+      # parameters:
+      #   - $ref: '#/components/parameters/header.Authorization'
+      requestBody:
+        $ref: '#/components/requestBodies/CreateOrder'
+      responses:
+        '201':
+          $ref: '#/components/responses/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Order
+    get:
+      description: List all orders.
+      operationId: listOrders
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/query.page'
+        - $ref: '#/components/parameters/query.pageSize'
+      responses:
+        '200':
+          $ref: '#/components/responses/OrderList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Order
+  '/Orders/{id}':
+    get:
+      description: Get the details of an order by order ID
+      operationId: getOrder
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/path.id'
+      responses:
+        '200':
+          $ref: '#/components/responses/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Order
+    delete:
+      description: |
+        Deletes an order by id.
+      operationId: deleteOrder
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/path.id'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Order
+    patch:
+      description: |
+        Updates an order
+      operationId: updateOrder
+      parameters:
+        # - $ref: '#/components/parameters/header.Authorization'
+        - $ref: '#/components/parameters/path.id'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateOrder'
+      responses:
+        '200':
+          $ref: '#/components/responses/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      tags:
+        - Order
+components:
+  schemas:
+    CreateOrder:
+      description: Create Order request body.
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderProduct"
+        # shippingAddress
+        # totalSaleAmount
+    UpdateOrder:
+      description: Update order request body.
+      properties:
+        shipping:
+          properties:
+            trackingCompany:
+              type: string
+              description: Description of the Order
+            trackingNumber:
+              type: string
+              description: Tracking number to track the shipment
+        status:
+          $ref: '#/components/schemas/status'
+    Order:
+      description: Order
+      properties:
+        id:
+          type: string
+          description: The id of the order
+          example: 42edcd77-d6f8-4c05-a441-930cb0085314
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderProduct"
+        shipping:
+          properties:
+            trackingCompany:
+              type: string
+              description: Description of the Order
+            trackingNumber:
+              type: string
+              description: Tracking number to track the shipment
+        status:
+          $ref: '#/components/schemas/status'
+    OrderList:
+      description: Order list
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        totalItems:
+          type: integer
+          description: The total number of items contained in the collection
+        totalPages:
+          type: integer
+          description: The total number of pages given the requested page size
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+    status:
+      type: string
+      description: The status of the order
+      enum:
+        - processing
+        - cancelled
+        - delivered
+     OrderProduct:
+      properties:
+        id:
+          type: string
+          description: The identifier of the product in the order.
+        quantity:
+          type: integer
+          descroption: The quatoty of product in the order.
+    Error:
+      description: Standard error description.
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+      required:
+        - code
+        - message
+        - errors
+    PaginationLinks:
+      description: The hypermedia links for navigating the search results.
+      properties:
+        self:
+          $ref: '#/components/schemas/Link'
+        first:
+          $ref: '#/components/schemas/Link'
+        previous:
+          $ref: '#/components/schemas/Link'
+        next:
+          $ref: '#/components/schemas/Link'
+        last:
+          $ref: '#/components/schemas/Link'
+      required:
+        - self
+        - first
+        - previous
+        - next
+        - last
+    Link:
+      description: A hypermedia link to a resource.
+      properties:
+        href:
+          type: string
+          description: The link url.
+      required:
+        - href
+  parameters:
+    path.id:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: The resource identifier.
+    header.Authorization:
+      in: header
+      name: Authorization
+      required: true
+      schema:
+        type: string
+      description: |
+        Authorization header containing a valid JWT access token.
+    query.page:
+      in: query
+      name: page
+      schema:
+        type: integer
+      description: |
+        An integer greater than zero representing the page of the results.
+    query.pageSize:
+      in: query
+      name: pageSize
+      schema:
+        type: integer
+      description: |
+        An integer greater than zero indicating the maximum number of results
+        to return at one time.
+  requestBodies:
+    CreateOrder:
+      description: |
+        A request body to create an order.
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/CreateOrder'
+    UpdateOrder:
+      description: |
+        A request body to update an Order.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateOrder'
+  responses:
+    Order:
+      description: Order
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Order'
+    OrderList:
+      description: Order
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OrderList'
+    BadRequest:
+      description: 400 - Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: 401 - Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: 403 - Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalError:
+      description: 500 - Internal Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 404 - Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoContent:
+      description: 204 - No Content
+#   securitySchemes:
+#     oauth2:
+#       type: oauth2
+#       description: OAuth2 security scheme.
+#       flows:
+#         authorizationCode:
+#           authorizationUrl: https://identity.fortellis.io/oauth2/aus1p1ixy7YL8cMq02p7/v1/authorize
+#           tokenUrl: https://identity.fortellis.io/oauth2/aus1p1ixy7YL8cMq02p7/v1/token
+#           scopes: {}
+# security:
+#   - oauth2: []
+tags:
+  - name: Order
